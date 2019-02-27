@@ -1,6 +1,6 @@
 package ballnbeam;
 
-public class PIDParameters {
+public class PIDParameters implements Cloneable{
 	public double K;
 	public double Ti;
 	public double Td;
@@ -17,6 +17,7 @@ public class PIDParameters {
 		try {
 			return super.clone();
 		} catch (CloneNotSupportedException x) {
+			System.out.println("Cloning fucked up");
 			return null;
 		}
 	}

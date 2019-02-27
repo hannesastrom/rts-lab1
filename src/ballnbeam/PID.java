@@ -22,18 +22,19 @@ public class PID {
 	// Constructor
 	public PID(String name) {
 		p = new PIDParameters();
-		p.Beta = 1.0;
+		p.Beta = 0.1;
 		p.H = 0.1;
 		p.integratorOn = false;
 		p.K = -0.1;
 		p.Ti = 0.0;
-		p.Td = 2.0;
-		p.N = 7;
+		p.Td = 3;
+		p.N = 5;
 		p.Tr = 10.0;
 		p.ad = p.Td / (p.Td + p.N * p.H);
 		p.bd = p.K * p.ad * p.N;
 		new PIDGUI(this, p, name);
-		setParameters(p);
+		this.setParameters(p);
+		
 		
 		this.I = 0.0;
 		this.v = 0.0;
@@ -47,6 +48,7 @@ public class PID {
 		this.e = yref - y;
 		D = p.ad*D - p.bd*(y - yOld);
 		this.v = p.K*(p.Beta*yref - y) + I + D;
+		yOld = y;
 		return this.v;
 	}
 	
@@ -59,7 +61,6 @@ public class PID {
 		} else {
 			I = 0.0;
 		}
-		yOld = y;
 	}
 	
 	// Returns the sampling interval expressed as a long.
@@ -76,6 +77,8 @@ public class PID {
 		if (!p.integratorOn) {
 			I = 0.0;
 		}
+		p.ad = p.Td/(p.Td + p.N*p.H);
+		p.bd = p.K*p.N*p.ad;
 	}
 }
 
