@@ -4,12 +4,17 @@ import SimEnvironment.AnalogSink;
 import SimEnvironment.AnalogSource;
 import core.PI;
 import core.ReferenceGenerator;
+import se.lth.cs.realtime.FixedPriorityException;
+import se.lth.cs.realtime.RTThread;
+import se.lth.cs.realtime.Semaphore;
 
 //BallAndBeamRegul class to be written by you
-public class BallAndBeamRegul extends Thread {
+public class BallAndBeamRegul extends RTThread {
 	private ReferenceGenerator refGen;
 	private PID posControl;
 	private PI angleControl;
+	private Semaphore posMutex;
+	private Semaphore angleMutex;
 
 	// Ska dessa delas upp separat??
 	private AnalogSource analogInAngle;
@@ -22,7 +27,7 @@ public class BallAndBeamRegul extends Thread {
 	private double uMax = 10.0;
 
 	// Constructor
-	public BallAndBeamRegul(ReferenceGenerator refgen, BallAndBeam bb, int priority) {
+	public BallAndBeamRegul(ReferenceGenerator refgen, BallAndBeam bb, Semaphore posMutex, Semaphore angleMutex, int priority) {
 		this.refGen = refgen;
 		posControl = new PID("Poser");
 		angleControl = new PI("Angler");
@@ -30,7 +35,14 @@ public class BallAndBeamRegul extends Thread {
 		analogInAngle = bb.getSource(1);
 		analogOut = bb.getSink(0);
 		analogRef = bb.getSink(1);
-		setPriority(priority);
+		this.posMutex = posMutex;
+		this.angleMutex = angleMutex;
+		try {
+			setPriority(priority);
+		} catch (FixedPriorityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	// Saturate output at limits
@@ -55,17 +67,18 @@ public class BallAndBeamRegul extends Thread {
 			double u2 = 0.0;
 			double u1 = 0.0;
 			
-			synchronized(posControl) {
+			posMutex.take();
 				u1 = limit(posControl.calculateOutput(pIn, ref), uMin, uMax);
 				posControl.updateState(u1);
-			}
+			posMutex.give();
 			double aIn = analogInAngle.get();
-			synchronized(angleControl) {
+			
+			angleMutex.take();
 				
 				u2 = limit(angleControl.calculateOutput(aIn, u1), uMin, uMax);
 				analogOut.set(u2);
 				angleControl.updateState(u2);
-			}
+			angleMutex.give();
 			
 			
 			

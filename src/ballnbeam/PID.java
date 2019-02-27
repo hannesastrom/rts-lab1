@@ -43,7 +43,7 @@ public class PID {
 	
 	// Calculates the control signal v.
 	// Called from BallAndBeamRegul.
-	public synchronized double calculateOutput(double y, double yref) {
+	public double calculateOutput(double y, double yref) {
 		this.y = y;
 		this.e = yref - y;
 		D = p.ad*D - p.bd*(y - yOld);
@@ -55,7 +55,7 @@ public class PID {
 	// Updates the controller state.
 	// Should use tracking-based anti-windup
 	// Called from BallAndBeamRegul.
-	public synchronized void updateState(double u) {
+	public void updateState(double u) {
 		if (p.integratorOn) {
 			I = I + (p.K * p.H / p.Ti) * e + (p.H / p.Tr) * (u - v);
 		} else {
@@ -65,14 +65,14 @@ public class PID {
 	
 	// Returns the sampling interval expressed as a long.
 	// Explicit type casting needed.
-	public synchronized long getHMillis() {
+	public long getHMillis() {
 		return (long) (p.H * 1000.0);
 	}
 	
 	// Sets the PIDParameters.
 	// Called from PIDGUI.
 	// Must clone newParameters.
-	public synchronized void setParameters(PIDParameters newParameters) {
+	public void setParameters(PIDParameters newParameters) {
 		p = (PIDParameters) newParameters.clone();
 		if (!p.integratorOn) {
 			I = 0.0;

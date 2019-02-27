@@ -31,7 +31,7 @@ public class PI {
 
 	// Calculates the control signal v.
 	// Called from BeamRegul.
-	public synchronized double calculateOutput(double y, double yref) {
+	public double calculateOutput(double y, double yref) {
 		this.e = yref - y;
 		this.v = p.K * (p.Beta * yref - y) + I; // I is 0.0 if integratorOn is false
 		return this.v;
@@ -40,7 +40,7 @@ public class PI {
 	// Updates the controller state.
 	// Should use tracking-based anti-windup
 	// Called from BeamRegul.
-	public synchronized void updateState(double u) {
+	public void updateState(double u) {
 		if (p.integratorOn) {
 			I = I + (p.K * p.H / p.Ti) * e + (p.H / p.Tr) * (u - v);
 		} else {
@@ -50,14 +50,14 @@ public class PI {
 
 	// Returns the sampling interval expressed as a long.
 	// Note: Explicit type casting needed
-	public synchronized long getHMillis() {
+	public long getHMillis() {
 		return (long) (p.H * 1000.0);
 	}
 
 	// Sets the PIParameters.
 	// Called from PIGUI.
 	// Must clone newParameters.
-	public synchronized void setParameters(PIParameters newParameters) {
+	public void setParameters(PIParameters newParameters) {
 		p = (PIParameters) newParameters.clone();
 		if (!p.integratorOn) {
 			I = 0.0;
